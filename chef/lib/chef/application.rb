@@ -21,6 +21,7 @@ require 'chef/exceptions'
 require 'chef/log'
 require 'mixlib/cli'
 require 'tmpdir'
+require 'rbconfig'
 
 class Chef::Application
   include Mixlib::CLI
@@ -127,11 +128,16 @@ class Chef::Application
 
   class << self
     def determine_base_path
-       #also set this in the config class? seperate method to set the config in the config class?
-       #set an instance variable?
+      if host_os =~ /mswin|mingw/ then
+        base_path = "#{ENV['SYSTEMDRIVE']}\\chef"
+      else
+        base_path =  "/etc/chef"
+      end
+      base_path
+    end
 
-       #make this work for windows
-      "/etc/chef"
+    def host_os
+      RbConfig::CONFIG['host_os']
     end
 
     def debug_stacktrace(e)
