@@ -26,6 +26,8 @@ require 'rbconfig'
 class Chef::Application
   include Mixlib::CLI
 
+  WINDOWS_OS_REGEX = /mswin|mingw|windows/
+
   class Wakeup < Exception
   end
 
@@ -40,7 +42,7 @@ class Chef::Application
       Chef::Application.fatal!("SIGINT received, stopping", 2)
     end
 
-    unless RUBY_PLATFORM =~ /mswin|mingw32|windows/
+    unless Chef::Application.host_os =~ WINDOWS_OS_REGEX
       trap("QUIT") do
         Chef::Log.info("SIGQUIT received, call stack:\n  " + caller.join("\n  "))
       end
@@ -128,10 +130,10 @@ class Chef::Application
 
   class << self
     def determine_base_path
-      if host_os =~ /mswin|mingw/ then
-        base_path = "#{ENV['SYSTEMDRIVE']}\\chef\\"
+      if host_os =~ WINDOWS_OS_REGEX then
+        base_path = "#{ENV['SYSTEMDRIVE']}/chef"
       else
-        base_path =  "/etc/chef/"
+        base_path = "/etc/chef"
       end
       base_path
     end

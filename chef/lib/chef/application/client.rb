@@ -33,7 +33,7 @@ class Chef::Application::Client < Chef::Application
   option :config_file,
     :short => "-c CONFIG",
     :long  => "--config CONFIG",
-    :default => "%sclient.rb" % Chef::Application.determine_base_path,
+    :default => "#{Chef::Application.determine_base_path}/client.rb",
     :description => "The configuration file to use"
 
   option :log_level,
