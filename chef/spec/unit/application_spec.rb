@@ -206,17 +206,17 @@ describe Chef::Application do
 
   describe "class method: determine_base_path" do
 
-    it "should return a base path of /etc/chef on non-windows systems" do
+    it "should return a base path of /etc/chef/ on non-windows systems" do
       Chef::Application.stub!(:host_os).and_return('linux')
-      Chef::Application.determine_base_path.should == "/etc/chef"
+      Chef::Application.determine_base_path.should == "/etc/chef/"
     end
 
-    it "should return a base path of c:\\chef on windows system" do
+    it "should return a base path of c:\\chef\\ on windows system" do
       Chef::Application.stub!(:host_os).and_return('mswin')
       # match on a regex that looks for the base path with an optional
       # system drive at the beginning (c:)
       # system drive is not hardcoded b/c it can change and b/c it is not present on linux systems
-      Chef::Application.determine_base_path.should match(/(^\S:)*\\chef$/)
+      Chef::Application.determine_base_path.should match(/(^\S:)*\\chef\\$/)
     end
 
   end

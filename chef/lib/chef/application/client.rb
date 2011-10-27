@@ -33,7 +33,7 @@ class Chef::Application::Client < Chef::Application
   option :config_file,
     :short => "-c CONFIG",
     :long  => "--config CONFIG",
-    :default => "/etc/chef/client.rb",
+    :default => "%sclient.rb" % Chef::Application.determine_base_path,
     :description => "The configuration file to use"
 
   option :log_level,
@@ -276,7 +276,7 @@ class Chef::Application::Client < Chef::Application
     end
   end
 
-  private 
+  private
 
   def client_sleep(sec)
     IO.select([ SELF_PIPE[0] ], nil, nil, sec) or return

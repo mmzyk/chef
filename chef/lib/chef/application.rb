@@ -129,9 +129,9 @@ class Chef::Application
   class << self
     def determine_base_path
       if host_os =~ /mswin|mingw/ then
-        base_path = "#{ENV['SYSTEMDRIVE']}\\chef"
+        base_path = "#{ENV['SYSTEMDRIVE']}\\chef\\"
       else
-        base_path =  "/etc/chef"
+        base_path =  "/etc/chef/"
       end
       base_path
     end
