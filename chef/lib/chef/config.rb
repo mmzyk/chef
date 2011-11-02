@@ -25,6 +25,8 @@ class Chef
 
     extend Mixlib::Config
 
+    WINDOWS_OS_REGEX = /mswin|mingw|windows/
+
     # Manages the chef secret session key
     # === Returns
     # <newkey>:: A new or retrieved session key
@@ -44,6 +46,19 @@ class Chef
 
     def self.inspect
       configuration.inspect
+    end
+
+    def self.determine_base_path(linux_path='/etc/chef', windows_path='/chef')
+      if host_os =~ WINDOWS_OS_REGEX then
+        path = "#{ENV['SYSTEMDRIVE']}#{windows_path}"
+      else
+        path = linux_path
+      end
+      path
+    end
+
+    def self.host_os
+      RbConfig::CONFIG['host_os']
     end
 
     # Override the config dispatch to set the value of multiple server options simultaneously
@@ -129,10 +144,10 @@ class Chef
     couchdb_url "http://localhost:5984"
 
     # Where chef's cache files should be stored
-    file_cache_path "/var/chef/cache"
+    file_cache_path "#{Chef::Config.determine_base_path '/var/chef'}/cache}"
 
     # Where backups of chef-managed files should go
-    file_backup_path "/var/chef/backup"
+    file_backup_path "#{Chef::Config.determine_base_path '/var/chef'}/backup"
 
     ## Daemonization Settings ##
     # What user should Chef run as?
@@ -148,7 +163,7 @@ class Chef
     log_level :info
     log_location STDOUT
     # toggle info level log items that can create a lot of output
-    verbose_logging true 
+    verbose_logging true
     node_name nil
     node_path "/var/chef/node"
 
@@ -201,8 +216,8 @@ class Chef
     # (persist across rabbitmq restarts)
     amqp_consumer_id "default"
 
-    client_key "/etc/chef/client.pem"
-    validation_key "/etc/chef/validation.pem"
+    client_key "#{Chef::Config.determine_base_path}/client.pem"
+    validation_key "#{Chef::Config.determine_base_path}/validation.pem"
     validation_client_name "chef-validator"
     web_ui_client_name "chef-webui"
     web_ui_key "/etc/chef/webui.pem"
@@ -235,7 +250,7 @@ class Chef
     # Checksum Cache
     # Uses Moneta on the back-end
     cache_type "BasicFile"
-    cache_options({ :path => "/var/chef/cache/checksums", :skip_expires => true })
+    cache_options({ :path => "#{Chef::Config.determine_base_path}/cache/checksums", :skip_expires => true })
 
     # Arbitrary knife configuration data
     knife Hash.new
