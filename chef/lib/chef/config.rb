@@ -130,7 +130,8 @@ class Chef
 
     # Where the cookbooks are located. Meaning is somewhat context dependent between
     # knife, chef-client, and chef-solo.
-    cookbook_path [ "/var/chef/cookbooks", "/var/chef/site-cookbooks" ]
+    cookbook_path [ "#{Chef::Config.determine_base_path '/var/chef'}/cookbooks",
+                    "#{Chef::Config.determine_base_path} '/var/chef'}/site-cookbooks" ]
 
     # Where files are stored temporarily during uploads
     sandbox_path "/var/chef/sandboxes"
@@ -194,7 +195,7 @@ class Chef
 
 
     # Where should chef-solo look for role files?
-    role_path "/var/chef/roles"
+    role_path "#{Chef::Config.determine_base_path '/var/chef'}/roles"
 
     # Where should chef-solo download recipes from?
     recipe_url nil
