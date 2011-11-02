@@ -107,7 +107,7 @@ describe Chef::Config do
    describe "class method: determine_base_path" do
     it "should return a base path of /etc/chef on non-windows systems" do
       Chef::Config.stub!(:host_os).and_return('linux')
-      Chef::Config.determine_base_path.should == "/etc/chef"
+      Chef::Config.determine_base_path.should == "/var/chef"
     end
 
     it "should return a base path of c:\\chef on windows system" do

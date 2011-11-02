@@ -48,7 +48,7 @@ class Chef
       configuration.inspect
     end
 
-    def self.determine_base_path(linux_path='/etc/chef', windows_path='/chef')
+    def self.determine_base_path(linux_path='/var/chef', windows_path='/chef')
       if host_os =~ WINDOWS_OS_REGEX then
         path = "#{ENV['SYSTEMDRIVE']}#{windows_path}"
       else
@@ -130,8 +130,8 @@ class Chef
 
     # Where the cookbooks are located. Meaning is somewhat context dependent between
     # knife, chef-client, and chef-solo.
-    cookbook_path [ "#{Chef::Config.determine_base_path '/var/chef'}/cookbooks",
-                    "#{Chef::Config.determine_base_path} '/var/chef'}/site-cookbooks" ]
+    cookbook_path [ "#{Chef::Config.determine_base_path}/cookbooks",
+                    "#{Chef::Config.determine_base_path}/site-cookbooks" ]
 
     # Where files are stored temporarily during uploads
     sandbox_path "/var/chef/sandboxes"
@@ -145,10 +145,10 @@ class Chef
     couchdb_url "http://localhost:5984"
 
     # Where chef's cache files should be stored
-    file_cache_path "#{Chef::Config.determine_base_path '/var/chef'}/cache}"
+    file_cache_path "#{Chef::Config.determine_base_path}/cache}"
 
     # Where backups of chef-managed files should go
-    file_backup_path "#{Chef::Config.determine_base_path '/var/chef'}/backup"
+    file_backup_path "#{Chef::Config.determine_base_path}/backup"
 
     ## Daemonization Settings ##
     # What user should Chef run as?
@@ -195,7 +195,7 @@ class Chef
 
 
     # Where should chef-solo look for role files?
-    role_path "#{Chef::Config.determine_base_path '/var/chef'}/roles"
+    role_path "#{Chef::Config.determine_base_path}/roles"
 
     # Where should chef-solo download recipes from?
     recipe_url nil
@@ -217,8 +217,8 @@ class Chef
     # (persist across rabbitmq restarts)
     amqp_consumer_id "default"
 
-    client_key "#{Chef::Config.determine_base_path}/client.pem"
-    validation_key "#{Chef::Config.determine_base_path}/validation.pem"
+    client_key "#{Chef::Config.determine_base_path '/etc/chef'}/client.pem"
+    validation_key "#{Chef::Config.determine_base_path '/etc/chef'}/validation.pem"
     validation_client_name "chef-validator"
     web_ui_client_name "chef-webui"
     web_ui_key "/etc/chef/webui.pem"
@@ -251,7 +251,7 @@ class Chef
     # Checksum Cache
     # Uses Moneta on the back-end
     cache_type "BasicFile"
-    cache_options({ :path => "#{Chef::Config.determine_base_path}/cache/checksums", :skip_expires => true })
+    cache_options({ :path => "#{Chef::Config.determine_base_path '/etc/chef'}/cache/checksums", :skip_expires => true })
 
     # Arbitrary knife configuration data
     knife Hash.new
