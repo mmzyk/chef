@@ -44,6 +44,17 @@ describe Chef::Application::Solo do
       Chef::Config[:solo].should be_true
     end
 
+    it "should merge in the config if the config failed to load from file" do
+      @app.stub!(:configure_chef).and_return(false)
+      Chef::Config.should_receive(:merge!)
+      @app.reconfigure
+    end
+
+    it "should not merge in the config if the config successfully loaded from a file" do
+      Chef::Config.should_not_receive(:merge!)
+      @app.reconfigure
+    end
+
     describe "when in daemonized mode and no interval has been set" do
       before do
         Chef::Config[:daemonize] = true

@@ -77,12 +77,12 @@ describe Chef::Application do
   describe "configure_chef" do
     before do
       @app = Chef::Application.new
-      #Chef::Config.stub!(:merge!).and_return(true)
       @app.stub!(:parse_options).and_return(true)
     end
 
     it "should parse the commandline options" do
-      @app.should_receive(:parse_options).and_return(true)
+      File.should_receive(:open)
+      @app.should_receive(:parse_options)
       @app.configure_chef
     end
 
@@ -113,6 +113,11 @@ describe Chef::Application do
         Chef::Config.rspec_ran.should == "true"
       end
 
+      it "should return true" do
+        File.should_receive(:open).with("/etc/chef/default.rb")
+        @app.configure_chef.should == true
+      end
+
     end
 
     describe "when there is no config_file defined" do
@@ -120,9 +125,19 @@ describe Chef::Application do
         @app.config[:config_file] = nil
       end
 
-      it "should configure chef::config from a file" do
-        Chef::Config.should_not_receive(:from_file).with("/etc/chef/default.rb")
+      it "should throw a fatal" do
+        Chef::Application.should_receive(:fatal!)
         @app.configure_chef
+      end
+    end
+
+    describe "when the config file is not found" do
+      before do
+        @app.config[:config_file] = "/etc/doesnotexist"
+      end
+
+      it "should return false" do
+        @app.configure_chef.should == false
       end
     end
 

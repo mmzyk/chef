@@ -119,7 +119,12 @@ class Chef::Application::Solo < Chef::Application
   end
 
   def reconfigure
-    super
+    success = super
+
+    if !success[:config]
+      # if loading of the config file was not successful, use the command line options
+      Chef::Config.merge!(config)
+    end
 
     Chef::Config[:solo] = true
 

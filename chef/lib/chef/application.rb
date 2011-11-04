@@ -59,8 +59,9 @@ class Chef::Application
 
   # Reconfigure the application. You'll want to override and super this method.
   def reconfigure
-    configure_chef
-    configure_logging
+    config_success = configure_chef
+    log_level = configure_logging
+    { :config => config_success, :log => log_level}
   end
 
   # Get this party started
@@ -78,20 +79,21 @@ class Chef::Application
       case config[:config_file]
       when /^(http|https):\/\//
         Chef::REST.new("", nil, nil).fetch(config[:config_file]) { |f| apply_config(f.path) }
+        success = true
       else
         ::File::open(config[:config_file]) { |f| apply_config(f.path) }
+        success = true
       end
+    rescue Errno::ENOENT => error
+      success = false
+      # file not found; let calling application handle, as it might be config is being handled command line
     rescue SocketError => error
       Chef::Application.fatal!("Error getting config file #{Chef::Config[:config_file]}", 2)
     rescue Exception => error
-      Chef::Log.warn("*****************************************")
-      Chef::Log.warn("Can not find config file: #{config[:config_file]}, using defaults.")
-      Chef::Log.warn("#{error.message}")
-      Chef::Log.warn("*****************************************")
-
-      Chef::Config.merge!(config)
+      Chef::Application.fatal!("Error processing config file #{Chef::Config[:config_file]} with error: #{error.message}", 2)
     end
 
+    success
   end
 
   # Initialize and configure the logger. If the configured log location is not
