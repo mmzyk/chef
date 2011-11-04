@@ -1,6 +1,7 @@
 #
 # Author:: AJ Christensen (<aj@opscode.com)
 # Author:: Christopher Brown (<cb@opscode.com>)
+# Author:: Mark Mzyk (mmzyk@opscode.com)
 # Copyright:: Copyright (c) 2008 Opscode, Inc.
 # License:: Apache License, Version 2.0
 #
@@ -33,7 +34,7 @@ class Chef::Application::Client < Chef::Application
   option :config_file,
     :short => "-c CONFIG",
     :long  => "--config CONFIG",
-    :default => "#{Chef::Application.determine_base_path}/client.rb",
+    :default => Chef::Config.platform_specific_path("/etc/chef/client.rb"),
     :description => "The configuration file to use"
 
   option :log_level,

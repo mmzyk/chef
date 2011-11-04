@@ -2,6 +2,7 @@
 # Author:: Adam Jacob (<adam@opscode.com>)
 # Author:: Christopher Brown (<cb@opscode.com>)
 # Author:: AJ Christensen (<aj@opscode.com>)
+# Author:: Mark Mzyk (mmzyk@opscode.com)
 # Copyright:: Copyright (c) 2008 Opscode, Inc.
 # License:: Apache License, Version 2.0
 #
@@ -25,8 +26,6 @@ class Chef
 
     extend Mixlib::Config
 
-    WINDOWS_OS_REGEX = /mswin|mingw|windows/
-
     # Manages the chef secret session key
     # === Returns
     # <newkey>:: A new or retrieved session key
@@ -48,13 +47,19 @@ class Chef
       configuration.inspect
     end
 
-    def self.determine_base_path(linux_path='/var/chef', windows_path='/chef')
-      if host_os =~ WINDOWS_OS_REGEX then
-        path = "#{ENV['SYSTEMDRIVE']}#{windows_path}"
-      else
-        path = linux_path
+    def self.platform_specific_path(path)
+      if host_os =~ Chef::Config[:windows_os_regex]
+        # turns /etc/chef/client.rb into C:\chef\client.rb
+        path = File.join(systemdrive, path.split('/')[2..-1])
+        # ensure all forward slashes are backslashes
+        # has a conditional because ALT_SEPARATOR is not defined on all platforms
+        path.gsub!(File::SEPARATOR, File::ALT_SEPARATOR) unless File::ALT_SEPARATOR == nil
       end
       path
+    end
+
+    def self.systemdrive
+      ENV['SYSTEMDRIVE']
     end
 
     def self.host_os
@@ -130,8 +135,8 @@ class Chef
 
     # Where the cookbooks are located. Meaning is somewhat context dependent between
     # knife, chef-client, and chef-solo.
-    cookbook_path [ "#{Chef::Config.determine_base_path}/cookbooks",
-                    "#{Chef::Config.determine_base_path}/site-cookbooks" ]
+    cookbook_path [ platform_specific_path("/var/chef/cookbooks"),
+                    platform_specific_path("/var/chef/site-cookbooks") ]
 
     # Where files are stored temporarily during uploads
     sandbox_path "/var/chef/sandboxes"
@@ -145,10 +150,10 @@ class Chef
     couchdb_url "http://localhost:5984"
 
     # Where chef's cache files should be stored
-    file_cache_path "#{Chef::Config.determine_base_path}/cache}"
+    file_cache_path platform_specific_path("/var/chef/cache")
 
     # Where backups of chef-managed files should go
-    file_backup_path "#{Chef::Config.determine_base_path}/backup"
+    file_backup_path platform_specific_path("/var/chef/backup")
 
     ## Daemonization Settings ##
     # What user should Chef run as?
@@ -195,7 +200,7 @@ class Chef
 
 
     # Where should chef-solo look for role files?
-    role_path "#{Chef::Config.determine_base_path}/roles"
+    role_path platform_specific_path("/var/chef/roles")
 
     # Where should chef-solo download recipes from?
     recipe_url nil
@@ -217,8 +222,8 @@ class Chef
     # (persist across rabbitmq restarts)
     amqp_consumer_id "default"
 
-    client_key "#{Chef::Config.determine_base_path '/etc/chef'}/client.pem"
-    validation_key "#{Chef::Config.determine_base_path '/etc/chef'}/validation.pem"
+    client_key platform_specific_path("/etc/chef/client.pem")
+    validation_key platform_specific_path("/etc/chef/validation.pem")
     validation_client_name "chef-validator"
     web_ui_client_name "chef-webui"
     web_ui_key "/etc/chef/webui.pem"
@@ -251,7 +256,7 @@ class Chef
     # Checksum Cache
     # Uses Moneta on the back-end
     cache_type "BasicFile"
-    cache_options({ :path => "#{Chef::Config.determine_base_path '/etc/chef'}/cache/checksums", :skip_expires => true })
+    cache_options({ :path => platform_specific_path("/etc/chef/cache/checksums"), :skip_expires => true })
 
     # Arbitrary knife configuration data
     knife Hash.new
@@ -260,5 +265,8 @@ class Chef
     # valid user and group name
     user_valid_regex [ /^([-a-zA-Z0-9_.]+)$/, /^\d+$/ ]
     group_valid_regex [ /^([-a-zA-Z0-9_.\\ ]+)$/, /^\d+$/ ]
+
+    # Regex to determine if running on a windows system
+    windows_os_regex /mswin|mingw|windows/
   end
 end

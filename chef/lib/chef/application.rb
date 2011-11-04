@@ -1,5 +1,6 @@
 #
 # Author:: AJ Christensen (<aj@opscode.com>)
+# Author:: Mark Mzyk (mmzyk@opscode.com)
 # Copyright:: Copyright (c) 2008 Opscode, Inc.
 # License:: Apache License, Version 2.0
 #
@@ -26,8 +27,6 @@ require 'rbconfig'
 class Chef::Application
   include Mixlib::CLI
 
-  WINDOWS_OS_REGEX = /mswin|mingw|windows/
-
   class Wakeup < Exception
   end
 
@@ -42,7 +41,7 @@ class Chef::Application
       Chef::Application.fatal!("SIGINT received, stopping", 2)
     end
 
-    unless Chef::Application.host_os =~ WINDOWS_OS_REGEX
+    unless Chef::Config.host_os =~ Chef::Config[:windows_os_regex]
       trap("QUIT") do
         Chef::Log.info("SIGQUIT received, call stack:\n  " + caller.join("\n  "))
       end
@@ -129,19 +128,6 @@ class Chef::Application
 
 
   class << self
-    def determine_base_path
-      if host_os =~ WINDOWS_OS_REGEX then
-        base_path = "#{ENV['SYSTEMDRIVE']}/chef"
-      else
-        base_path = "/etc/chef"
-      end
-      base_path
-    end
-
-    def host_os
-      RbConfig::CONFIG['host_os']
-    end
-
     def debug_stacktrace(e)
       message = "#{e.class}: #{e}\n#{e.backtrace.join("\n")}"
       chef_stacktrace_out = "Generated at #{Time.now.to_s}\n"
