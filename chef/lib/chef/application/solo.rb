@@ -123,6 +123,9 @@ class Chef::Application::Solo < Chef::Application
 
     if !success[:config]
       # if loading of the config file was not successful, use the command line options
+      Chef::Log.warn("*****************************************")
+      Chef::Log.warn("Did not find config file #{config[:config_file]} so using command line options given")
+      Chef::Log.warn("*****************************************")
       Chef::Config.merge!(config)
     end
 
