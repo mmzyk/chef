@@ -107,14 +107,14 @@ describe Chef::Config do
    describe "class method: plaform_specific_path" do
     it "should return given path on non-windows systems" do
       path = "/etc/chef/cookbooks"
-      Chef::Config.stub!(:host_os).and_return('linux')
+      RbConfig::CONFIG.stub!(:[]).with('host_os').and_return('linux')
       Chef::Config.platform_specific_path(path).should == "/etc/chef/cookbooks"
     end
 
     it "should return a windows path on windows systems" do
       path = "/etc/chef/cookbooks"
-      Chef::Config.stub!(:host_os).and_return('mswin')
-      Chef::Config.stub!(:systemdrive).and_return('C:')
+      RbConfig::CONFIG.stub!(:[]).with('host_os').and_return('mswin')
+      ENV.stub!(:[]).with('SYSTEMDRIVE').and_return('C:')
       # match on a regex that looks for the base path with an optional
       # system drive at the beginning (c:)
       # system drive is not hardcoded b/c it can change and b/c it is not present on linux systems

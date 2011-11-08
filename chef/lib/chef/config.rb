@@ -48,22 +48,14 @@ class Chef
     end
 
     def self.platform_specific_path(path)
-      if host_os =~ Chef::Config[:windows_os_regex]
+      if RbConfig::CONFIG['host_os'] =~ Chef::Config[:windows_os_regex]
         # turns /etc/chef/client.rb into C:\chef\client.rb
-        path = File.join(systemdrive, path.split('/')[2..-1])
+        path = File.join(ENV['SYSTEMDRIVE'], path.split('/')[2..-1])
         # ensure all forward slashes are backslashes
         # has a conditional because ALT_SEPARATOR is not defined on all platforms
         path.gsub!(File::SEPARATOR, File::ALT_SEPARATOR) unless File::ALT_SEPARATOR == nil
       end
       path
-    end
-
-    def self.systemdrive
-      ENV['SYSTEMDRIVE']
-    end
-
-    def self.host_os
-      RbConfig::CONFIG['host_os']
     end
 
     # Override the config dispatch to set the value of multiple server options simultaneously
