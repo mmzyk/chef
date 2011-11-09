@@ -1,5 +1,6 @@
 #
 # Author:: AJ Christensen (<aj@opscode.com>)
+# Author:: Mark Mzyk (mmzyk@opscode.com)
 # Copyright:: Copyright (c) 2008 Opscode, Inc.
 # License:: Apache License, Version 2.0
 #
@@ -21,6 +22,7 @@ require 'chef/exceptions'
 require 'chef/log'
 require 'mixlib/cli'
 require 'tmpdir'
+require 'rbconfig'
 
 class Chef::Application
   include Mixlib::CLI
@@ -39,7 +41,7 @@ class Chef::Application
       Chef::Application.fatal!("SIGINT received, stopping", 2)
     end
 
-    unless RUBY_PLATFORM =~ /mswin|mingw32|windows/
+    unless Chef::Config.host_os =~ Chef::Config[:windows_os_regex]
       trap("QUIT") do
         Chef::Log.info("SIGQUIT received, call stack:\n  " + caller.join("\n  "))
       end
